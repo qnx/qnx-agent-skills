@@ -3,10 +3,10 @@
 #
 # Only needed if your client reads skills from a global location rather than
 # from the project directory. If you run your agent from inside this repo, the
-# committed symlinks (.claude/skills, .codex/skills, .agents/skills) already
+# committed symlinks (.claude/skills, .codex/skills, .gemini/skills, .agents/skills) already
 # point at skills/ and there is nothing to do.
 #
-# Usage: ./setup.sh [claude|codex|agents]
+# Usage: ./setup.sh [claude|codex|gemini|agents]
 #        defaults to "agents" (the cross-client convention)
 
 set -eu
@@ -18,8 +18,9 @@ SRC="$REPO/skills"
 case "$CLIENT" in
   claude) DEST="$HOME/.claude/skills" ;;
   codex)  DEST="$HOME/.codex/skills" ;;
+  gemini) DEST="$HOME/.gemini/skills" ;;
   agents) DEST="$HOME/.agents/skills" ;;
-  *) echo "unknown client '$CLIENT' (expected: claude, codex, agents)" >&2; exit 1 ;;
+  *) echo "unknown client '$CLIENT' (expected: claude, codex, gemini, agents)" >&2; exit 1 ;;
 esac
 
 if [ -e "$DEST" ] && [ ! -L "$DEST" ]; then

@@ -9,12 +9,12 @@ If you are an AI agent reading this file, follow the setup below, then work from
 **1. Make the skills discoverable.** The canonical skill set lives in `skills/`. Symlinks are already committed for the common project-level locations, so if you are running from this directory you should find the skills at whichever of these your client uses:
 
 ```
-.claude/skills/     .codex/skills/     .agents/skills/
+.claude/skills/     .codex/skills/     .gemini/skills/     .agents/skills/
 ```
 
-All three point at `skills/`. There is one copy on disk; nothing needs duplicating.
+All four point at `skills/`. There is one copy on disk; nothing needs duplicating.
 
-If your client only reads a global directory (`~/.claude/skills`, `~/.codex/skills`, `~/.agents/skills`), run `./setup.sh` once. It links `skills/` into the global location for the client you name. If your client uses a location none of the above cover, create the symlink yourself and open a PR adding it here so the next person gets it for free.
+If your client only reads a global directory (`~/.claude/skills`, `~/.codex/skills`, `~/.gemini/skills`, `~/.agents/skills`), run `./setup.sh` once. It links `skills/` into the global location for the client you name. If your client uses a location none of the above cover, create the symlink yourself and open a PR adding it here so the next person gets it for free.
 
 **2. Read `TARGET.md`.** It holds how to reach the QNX target: connection, authentication, the authoritative aports tree path, and any facts specific to that image.
 

@@ -45,6 +45,7 @@ If your client only reads a global skills directory, run `./setup.sh` once:
 ```bash
 ./setup.sh claude    # links ~/.claude/skills
 ./setup.sh codex     # links ~/.codex/skills
+./setup.sh gemini    # links ~/.gemini/skills
 ./setup.sh agents    # links ~/.agents/skills (default)
 ```
 
@@ -53,6 +54,7 @@ If your client only reads a global skills directory, run `./setup.sh` once:
 ```
 AGENTS.md      canonical agent instructions: setup, rules, skill map
 CLAUDE.md      pointer to AGENTS.md, so Claude Code finds it automatically
+GEMINI.md      pointer to AGENTS.md, so Gemini CLI finds it automatically
 TARGET.md      your QNX target: connection, auth, tree path (you fill this in)
 skills/        the skill set, one directory per skill
 projects/      per-port notes and reports land here
@@ -64,7 +66,7 @@ settings.template.json   optional Claude Code permission rules, to prompt less
 `PROMPTS.md`, `SOLUTIONS.md` and `RUNBOOK.md` are deliberately not tracked (see
 `.gitignore`), so your prompts, worked answers and operator notes stay yours.
 
-`.claude/skills`, `.codex/skills`, and `.agents/skills` are symlinks to
+`.claude/skills`, `.codex/skills`, `.gemini/skills`, and `.agents/skills` are symlinks to
 `skills/`. Nothing is duplicated, so a fix to a skill is a single edit.
 
 ## The skills
