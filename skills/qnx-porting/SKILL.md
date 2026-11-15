@@ -63,6 +63,8 @@ Find the row that matches what you are doing and load that skill.
 
 **Adding or extending a skill** (recording a newly proven fact, splitting an oversized skill, creating a skill for a new area): load `skill-authoring`.
 
+**Writing QNX native IPC in Rust** (channels, `MsgSend`/`MsgReceive`/`MsgReply`, pulses and pulse timers, `name_attach`/`name_open`, a resource manager serving a `/dev` path, Rust and C sharing one message protocol, the qnx-ipc crates): load `qnx-rust-ipc`. This is application development cross-compiled on the host with QNX's Rust package, not an aports port, so rule 5 does not describe it.
+
 **A platform-level problem** (a missing Linux syscall, a link error for sockets or regex, a stack-size segfault, a header difference, a toolchain quirk): load `qnx-platform-facts`.
 
 ## Skill map
@@ -74,6 +76,7 @@ qnx-porting (this router)
 ├── qnx-apk-packaging         end-to-end port-to-PR workflow + validation gate
 ├── qnx-port-reporting        after-action REPORT.md per port
 ├── aports-patch-creation     patch workflow and format gate
+├── qnx-rust-ipc              native IPC and resource managers in Rust (qnx-ipc crates)
 └── skill-authoring           how to add or extend a skill in this repo
 ```
 

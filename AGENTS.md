@@ -56,6 +56,7 @@ qnx-porting (router, read first)
 ├── qnx-apk-packaging         end-to-end port-to-PR workflow and validation gate
 ├── qnx-port-reporting        the after-action REPORT.md written per port
 ├── aports-patch-creation     patch workflow and format gate
+├── qnx-rust-ipc              native IPC and resource managers in Rust (qnx-ipc crates)
 └── skill-authoring           how to add or extend a skill in this repo
 ```
 
