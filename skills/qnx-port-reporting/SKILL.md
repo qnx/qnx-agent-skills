@@ -69,7 +69,12 @@ The commands run and what they showed:
 - clean unpack: patches apply, no .rej
 - full build: result, packages produced
 - tests: how many passed / skipped / failed, and which
-- any consumer that was validated against this package
+- consumer test (required for packages that ship a library, headers, or CMake/pkg-config files; see the gate in `qnx-apk-packaging`):
+  - the program used and where it is kept
+  - the routes it was built through against the installed packages (CMake, pkg-config) with default flags
+  - its result on each target and the reference it was compared with, including any platform-consistent difference
+  - whether the installed CMake/pkg-config files carry every definition the build added for ABI or layout reasons
+  - if it was not run, or a route was not available, state that here and repeat it under Open items
 
 ## Open items / remaining risk
 

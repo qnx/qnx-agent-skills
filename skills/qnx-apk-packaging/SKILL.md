@@ -179,7 +179,7 @@ TARGET.md.
 Target-specific instances of these belong in TARGET.md.
 
 ### 7. Test package function
-Enable and run upstream tests where practical. Do not disable an entire suite by default just because some tests are expected to fail. If a suite must be disabled globally, document the specific blocker, the attempted command, and why selective skips are not enough. If individual tests are skipped, list each with its observed failure mode or external dependency. Prefer a small direct smoke test of the package itself, and validate at least one real consumer when the package is a dependency-chain component.
+Enable and run upstream tests where practical. Do not disable an entire suite by default just because some tests are expected to fail. If a suite must be disabled globally, document the specific blocker, the attempted command, and why selective skips are not enough. If individual tests are skipped, list each with its observed failure mode or external dependency. Prefer a small direct smoke test of the package itself, and run the consumer test in the validation gate below. In this workflow a "consumer" is an independent program built only from the installed packages and run; neither the package's own `check()` nor a dependent package that merely builds counts as one.
 
 Before disabling a test, separate environment failures from real defects. A whole suite failing identically is usually the harness, not the code: for example a test script that calls `cmp` fails with `cmp: command not found` because the image's busybox lacks that applet, fixed by `checkdepends="diffutils"`, not by skipping. (Some missing tools have no package to add: this image's busybox also lacks `killall`, and `psmisc` is not packaged, so a harness calling `killall` cannot be satisfied with a checkdep; record such cases in TARGET.md.) Once the harness runs, a single test that still fails on QNX while the rest of the suite passes is a documented selective skip via `ctest ... -E '^name$'` (or the suite's equivalent) with a comment stating the observed failure mode, plus a note in the package project README to follow up. Do not skip the suite to hide a real per-platform defect.
 
@@ -220,6 +220,8 @@ abuild clean && abuild -r -c -K        # builds, tests pass, expected APKs produ
 find pkg -name '*.so*' | sort          # subpackage split correct, nothing orphaned
 readelf -d pkg/*/usr/lib/*.so.* | grep NEEDED   # every non-libc entry is covered by depends=
 grep -oE '\-l[a-z0-9_-]+' /tmp/build.log | sort -u  # every -l covered by makedepends (see step 6)
+# consumer test, independent of check(): install the built packages, build and run an
+# independent program against them (see "The consumer test" below)
 git status                             # read-only check: only intended files modified
 ```
 
@@ -259,6 +261,26 @@ package is the thing being checked, and on an image where `so:` derivation is de
 If the target needs the `SUDO_APK` elevation wrapper (see TARGET.md), the `abuild -r`
 line needs it too: `SUDO_APK=/tmp/sudo-apk abuild -r -c -K`. Without it the gate fails at
 `builddeps failed` before compiling anything, which looks like a package problem and is not.
+
+### The consumer test
+
+The consumer test is a gate step in its own right. It runs whether or not the package has a `check()`, and a passing `check()` does not satisfy it. `check()` exercises the build tree with the build's own compiler flags, definitions and include paths. A user has none of that: they have the installed packages and default flags. Differences between the two are invisible to `check()` and show up only in a separate program, as a link failure, a crash, or a silently wrong answer.
+
+Required for every package that installs a library, headers, or CMake or pkg-config files. Do these in order:
+
+1. **Install what a user would install.** Add the freshly built `<pkg>-libs` (if split) and `<pkg>-dev` from the local repo with `apk add`, after removing any older copy. Confirm with `apk info -L` that the installed files are the ones just built, for example by comparing checksums against `pkg/<pkg>-dev`. Test against the packages, not against `pkg/` or the build tree.
+2. **Write the program outside the source tree.** Include the public headers and call a few core entry points. Choose operations whose results you can state in advance or compare: a count, a size, a checksum, a printed value rounded to a fixed precision. A program that only links and exits 0 proves little; a program whose output you compare proves more. Keep it small and keep it with the port's staging files.
+3. **Build it by every route the package offers, with default flags.** Use `find_package(<Name>)` if a CMake config is installed, and `pkg-config --cflags --libs <module>` if a `.pc` file is installed. Do not add flags the installed files do not supply: if the program only builds or only runs correctly once you add an extra definition or compiler option, that option is missing from the package's exported configuration. If a route is not shipped, record that instead of skipping it silently.
+4. **Run it on the target and compare with a reference.** The reference is the same program built against the same upstream version on the host, or against known values. Numeric differences within the tolerance expected for the type are fine; any other difference, a crash, or a wrong answer fails the gate, even when `check()` passed. Differences that come from the platform and are consistent within the program (for example the size or alignment of a type) are noted, not failures.
+5. **Check the exported configuration.** Every compile definition or flag the APKBUILD adds for the build and that affects headers or binary layout must also appear in the installed CMake or pkg-config files. Extract the built `-dev` `.apk` (`tar -xzf`) and grep them.
+
+Variants:
+- Header-only package: compile and run one program, as above; there is no `-libs`.
+- Tool or application package: run an installed binary from the package, from a directory other than the build tree, and check its output.
+- Plugin or data package: use the consumer's own lookup path (see step 7 and the data-package notes) rather than a program of your own.
+- No suitable reference on the host: compare against values computed independently and state where they come from.
+
+Record the program, the routes used, and the results on the target and the host in the port README's validation section. If the test was not run, or a route could not be tested, say so under open items; do not report the port as validated.
 
 This gate is the human's check. A local agent can run the commands, but the judgment to proceed is the driver's.
 

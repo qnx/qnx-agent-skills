@@ -74,6 +74,8 @@ abuild clean && abuild -K unpack prepare  # patches APPLY here, no Hunk FAILED, 
 abuild clean && abuild -r -c -K        # builds, tests pass, expected APKs produced
 find pkg -name '*.so*' | sort          # subpackage split correct, nothing orphaned
 readelf -d pkg/*/usr/lib/*.so.* | grep NEEDED   # every non-libc entry covered by depends=
+# consumer test, independent of check(): install the built packages, then build and run a
+# small program outside the source tree against them (see qnx-apk-packaging)
 git status                             # read-only check: only intended files modified
 ```
 
@@ -81,3 +83,10 @@ A package with missing runtime dependencies passes every other line of this gate
 builds, tests, and splits correctly, and only fails on a machine that does not already
 have the dependency installed. See `qnx-apk-packaging` for how to resolve each `NEEDED`
 entry to its owning package.
+
+The package's own `check()` cannot replace the consumer test. `check()` runs against the
+build tree with the build's own flags; the consumer test runs against what a user actually
+installs, with default flags. A package can pass every other line of this gate and still
+give wrong results, or fail to link, when used from a separate program. Run the consumer
+test for every package that ships a library, headers, or CMake/pkg-config files, whether or
+not `check()` exists or passed. `qnx-apk-packaging` defines the procedure.
